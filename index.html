@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>DevTrack Dashboard</title>
+
+<style>
+body{
+  font-family: Arial;
+  background:#111;
+  color:white;
+  text-align:center;
+  padding:40px;
+}
+
+h1{
+  color:#00ffcc;
+}
+
+input{
+  padding:10px;
+  font-size:16px;
+}
+
+button{
+  padding:10px;
+  margin:5px;
+  background:#00ffcc;
+  border:none;
+  cursor:pointer;
+}
+
+li{
+  margin:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>🚀 DevTrack Dashboard</h1>
+
+<input id="taskInput" placeholder="Nova tarefa">
+
+<button onclick="addTask()">Adicionar tarefa</button>
+
+<h2>Tarefas</h2>
+
+<ul id="taskList"></ul>
+
+<script>
+let tasks = [];
+
+function addTask(){
+  const input = document.getElementById("taskInput");
+  const task = {
+    name: input.value,
+    xp: 50
+  };
+  tasks.push(task);
+  render();
+  input.value="";
+}
+
+function render(){
+  const list = document.getElementById("taskList");
+  list.innerHTML="";
+  tasks.forEach(t=>{
+    const li = document.createElement("li");
+    li.innerText = t.name + " (+ " + t.xp + " XP)";
+    list.appendChild(li);
+  });
+}
+</script>
+
+</body>
+
+</html>
