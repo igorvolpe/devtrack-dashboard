@@ -1,79 +1,247 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pt-BR">
 <head>
-<title>DevTrack Dashboard</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DevQuest Pro</title>
 <style>
-body{
-  font-family: Arial;
-  background:#111;
-  color:white;
-  text-align:center;
-  padding:40px;
-}
+  @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
-h1{
-  color:#00ffcc;
-}
-
-input{
-  padding:10px;
-  font-size:16px;
-}
-
-button{
-  padding:10px;
-  margin:5px;
-  background:#00ffcc;
-  border:none;
-  cursor:pointer;
-}
-
-li{
-  margin:10px;
-}
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #121212, #1a1a2e);
+    color: #00ffd5;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  h1 {
+    font-weight: 900;
+    font-size: 3rem;
+    margin-bottom: 10px;
+  }
+  .container {
+    background: #222538;
+    border-radius: 12px;
+    padding: 20px 30px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 0 15px #00ffd5aa;
+  }
+  .status {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+  }
+  .xp-bar-container {
+    background: #44466a;
+    border-radius: 20px;
+    height: 25px;
+    overflow: hidden;
+  }
+  .xp-bar {
+    background: #00ffd5;
+    height: 100%;
+    width: 0;
+    border-radius: 20px 0 0 20px;
+    transition: width 0.5s ease-in-out;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #00ffd5;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #121212;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #00e6c0;
+  }
+  ul {
+    list-style: none;
+    padding-left: 0;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  li {
+    background: #1b1b2f;
+    margin-bottom: 8px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .xp-value {
+    color: #00ffa3;
+    font-weight: bold;
+  }
+  .achievement {
+    background: #00ffa3;
+    color: #121212;
+    padding: 8px 12px;
+    margin-top: 15px;
+    border-radius: 10px;
+    font-weight: 700;
+    box-shadow: 0 0 15px #00ffa3aa;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideIn 0.5s forwards;
+  }
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
-
 </head>
-
 <body>
 
-<h1>🚀 DevTrack Dashboard</h1>
+<h1>🚀 DevQuest Pro</h1>
 
-<input id="taskInput" placeholder="Nova tarefa">
+<div class="container">
 
-<button onclick="addTask()">Adicionar tarefa</button>
+  <div class="status">
+    <span>Nível: <strong id="nivel">1</strong></span>
+    <span>XP: <strong id="xp">0</strong>/100</span>
+  </div>
+  <div class="xp-bar-container">
+    <div class="xp-bar" id="xp-bar"></div>
+  </div>
 
-<h2>Tarefas</h2>
+  <input type="text" id="taskInput" placeholder="Digite uma nova tarefa..." maxlength="50" />
+  <button id="addTaskBtn">Adicionar tarefa (+50 XP)</button>
 
-<ul id="taskList"></ul>
+  <ul id="taskList"></ul>
+
+  <div id="achievementBox"></div>
+
+</div>
 
 <script>
-let tasks = [];
+  const nivelElem = document.getElementById('nivel');
+  const xpElem = document.getElementById('xp');
+  const xpBar = document.getElementById('xp-bar');
+  const taskInput = document.getElementById('taskInput');
+  const addTaskBtn = document.getElementById('addTaskBtn');
+  const taskList = document.getElementById('taskList');
+  const achievementBox = document.getElementById('achievementBox');
 
-function addTask(){
-  const input = document.getElementById("taskInput");
-  const task = {
-    name: input.value,
-    xp: 50
-  };
-  tasks.push(task);
-  render();
-  input.value="";
-}
+  let nivel = 1;
+  let xp = 0;
+  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  let achievements = JSON.parse(localStorage.getItem('achievements')) || [];
 
-function render(){
-  const list = document.getElementById("taskList");
-  list.innerHTML="";
-  tasks.forEach(t=>{
-    const li = document.createElement("li");
-    li.innerText = t.name + " (+ " + t.xp + " XP)";
-    list.appendChild(li);
-  });
-}
+  function saveData() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem('achievements', JSON.stringify(achievements));
+    localStorage.setItem('nivel', nivel);
+    localStorage.setItem('xp', xp);
+  }
+
+  function updateStatus() {
+    nivelElem.textContent = nivel;
+    xpElem.textContent = xp;
+    xpBar.style.width = (xp) + '%';
+  }
+
+  function addAchievement(text) {
+    if (!achievements.includes(text)) {
+      achievements.push(text);
+      saveData();
+      const div = document.createElement('div');
+      div.className = 'achievement';
+      div.textContent = `🏆 ${text}`;
+      achievementBox.appendChild(div);
+      setTimeout(() => {
+        div.style.opacity = '0';
+        setTimeout(() => achievementBox.removeChild(div), 500);
+      }, 3000);
+    }
+  }
+
+  function renderTasks() {
+    taskList.innerHTML = '';
+    tasks.forEach((task, index) => {
+      const li = document.createElement('li');
+      li.textContent = task.name;
+
+      const xpSpan = document.createElement('span');
+      xpSpan.className = 'xp-value';
+      xpSpan.textContent = `+${task.xp} XP`;
+
+      li.appendChild(xpSpan);
+
+      // Botão para remover tarefa
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '✖';
+      delBtn.style.marginLeft = '10px';
+      delBtn.style.background = 'transparent';
+      delBtn.style.border = 'none';
+      delBtn.style.color = '#ff4c4c';
+      delBtn.style.cursor = 'pointer';
+      delBtn.title = 'Remover tarefa';
+
+      delBtn.onclick = () => {
+        tasks.splice(index, 1);
+        saveData();
+        renderTasks();
+      };
+
+      li.appendChild(delBtn);
+
+      taskList.appendChild(li);
+    });
+  }
+
+  function addTask() {
+    const taskName = taskInput.value.trim();
+    if (taskName === '') return;
+
+    const task = { name: taskName, xp: 50 };
+    tasks.push(task);
+    xp += 50;
+
+    if (xp >= 100) {
+      nivel++;
+      xp -= 100;
+      addAchievement(`Subiu para nível ${nivel}!`);
+    }
+
+    saveData();
+    updateStatus();
+    renderTasks();
+
+    taskInput.value = '';
+  }
+
+  addTaskBtn.addEventListener('click', addTask);
+
+  // Inicialização
+  nivel = parseInt(localStorage.getItem('nivel')) || 1;
+  xp = parseInt(localStorage.getItem('xp')) || 0;
+  updateStatus();
+  renderTasks();
+
 </script>
 
 </body>
-
 </html>
